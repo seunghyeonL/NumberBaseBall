@@ -8,21 +8,21 @@ FString UMyFuncLib::GetBallResult(FString ServerBall, FString PlayerBall)
 	FString Result = TEXT("");
 	TMap<char, int32> ResultMap;
 	
-	for (int i = 0 ; i < 3 ; i++)
+	for (int32 i = 0 ; i < 3 ; i++)
 	{
-		for (int j = 0 ; j < 3 ; j++)
+		for (int32 j = 0 ; j < 3 ; j++)
 		{
 			if (PlayerBall[i] == ServerBall[j])
 			{
-				if (i == j) ResultMap['S']++;
-				else ResultMap['B']++;
+				if (i == j) ResultMap.FindOrAdd('S')++;
+				else ResultMap.FindOrAdd('B')++;
 			}
 		}
 	}
 	
-	Result.AppendInt(ResultMap['S']);
+	Result.AppendInt(ResultMap.FindOrAdd('S'));
 	Result.AppendChar('S');
-	Result.AppendInt(ResultMap['B']);
+	Result.AppendInt(ResultMap.FindOrAdd('B'));
 	Result.AppendChar('B');
 	return Result;
 }

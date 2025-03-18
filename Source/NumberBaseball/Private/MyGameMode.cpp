@@ -1,10 +1,67 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NumberBaseball/Public/MyGameMode.h"
+#include "Types.h"
 #include "MyFuncLib.h"
 #include "MyGameState.h"
+#include "MyPlayerController.h"
+#include "MyPlayerState.h"
 #include "Algo/RandomShuffle.h"
 #include "GameFramework/PlayerState.h"
+
+// void AMyGameMode::CallBroadCastMessage(const FText& Message)
+// {
+// 	auto MyGS = GetGameState<AMyGameState>();
+// 	if (!MyGS)
+// 	{
+// 		UE_LOG(LogTemp, Error, TEXT("GameStart: GameState is null"));
+// 		return;
+// 	}
+//
+// 	MyGS->BroadCastMessage(Message);
+// }
+
+AMyGameMode::AMyGameMode()
+{
+	MaxTurn = 10;
+	CurrentTurnIdx = -1;
+}
+
+void AMyGameMode::BroadcastMessage(const FText& Message)
+{
+	for (auto It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (auto PC = It->Get())
+		{
+			if (auto TargetPC = Cast<AMyPlayerController>(PC))
+			{
+				TargetPC->UpdateMessageToClient(Message);
+			}
+		}
+	}
+}
+
+void AMyGameMode::CheckClientsReadyState()
+{
+	auto MyGS = GetGameState<AMyGameState>();
+	if (!MyGS)
+	{
+		UE_LOG(LogTemp, Error, TEXT("CheckClientsReadyState: GameState is null"));
+		return;
+	}
+
+	auto PSArray = MyGS->PlayerArray;
+
+	for (auto PS : PSArray)
+	{
+		if (auto TargetPS = Cast<AMyPlayerState>(PS))
+		{
+			if (TargetPS->GetUserState() != EUserState::Ready) return;
+		}
+	}
+
+	GameStart();
+}
 
 void AMyGameMode::GameStart()
 {
@@ -16,14 +73,141 @@ void AMyGameMode::GameStart()
 		return;
 	}
 
+	// SetGameState
+	MyGS->SetIsInGame(true);
+
 	// Player's Order, Turn Variables Setting
-	for (auto TargetPS: MyGS->PlayerArray)
+	for (auto TargetPS : MyGS->PlayerArray)
 	{
-		OrderOfPlayers.Add(TargetPS->GetUniqueId());
+		OrderOfPlayers.Add(TargetPS->GetPlayerId());
 	}
 	Algo::RandomShuffle(OrderOfPlayers);
-	CurrentTurnIdx = 0;
+	CurrentTurnIdx = -1;
 
 	// Server Ball Value Setting
 	ServerBall = UMyFuncLib::GenerateRandomNumberString();
+	ServerBall = TEXT("123");
+
+	// SetPlayers
+	SetPlayersTurn(true);
+
+	// Game Start Text BroadCast
+	BroadcastMessage(FText::FromString(TEXT("Game Start!!")));
+
+	// MyGS->BroadCastMessage(FText::FromString(TEXT("테스트메세지")));
+}
+
+void AMyGameMode::CompareBall(AMyPlayerController* TargetPC, const FString& NumberMessage)
+{
+	FString PlayerBall = "";
+	PlayerBall.AppendChar(NumberMessage[1]);
+	PlayerBall.AppendChar(NumberMessage[2]);
+	PlayerBall.AppendChar(NumberMessage[3]);
+
+	FString Result = UMyFuncLib::GetBallResult(ServerBall, PlayerBall);
+
+	TargetPC->SendOneBallResultToClient(PlayerBall, Result);
+	if (Result == TEXT("3S0B"))
+	{
+		if (auto TargetPS = Cast<AMyPlayerState>(TargetPC->PlayerState))
+		{
+			GameEnd(TargetPS->GetUsername());
+			if (auto MyGS = GetGameState<AMyGameState>())
+			{
+				MyGS->AddPlayerScore(TargetPS->GetUsername());
+			}
+			return;
+		}
+	}
+	SetPlayersTurn(false);
+}
+
+void AMyGameMode::AddPlayer(const FName& PlayerName)
+{
+	auto MyGS = Cast<AMyGameState>(GameState);
+	MyGS->AddPlayer(PlayerName);
+	MyGS->UpdatePlayerScoreMulticast();
+}
+
+
+void AMyGameMode::SetPlayersTurn(bool bIsAtGameStart)
+{
+	CurrentTurnIdx = (CurrentTurnIdx + 1) % GetWorld()->GetNumPlayerControllers();
+	if (CurrentTurnIdx == 0) --MaxTurn;
+	if (MaxTurn < 0)
+	{
+		GameEnd(FName());
+		return;
+	}
+
+	for (auto It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (auto PC = It->Get())
+		{
+			if (auto TargetPC = Cast<AMyPlayerController>(PC))
+			{
+				if (auto TargetPS = Cast<AMyPlayerState>(TargetPC->PlayerState))
+				{
+					if (bIsAtGameStart) TargetPC->ClearHistoryBoxClient();
+					int32 CurrentTurnPlayerId = OrderOfPlayers[CurrentTurnIdx];
+					if (CurrentTurnPlayerId == TargetPS->GetPlayerId())
+					{
+						TargetPS->ServerSetUserState(EUserState::Gaming_MyTurn);
+						TargetPC->UpdateUIToClient(true, EUserState::Gaming_MyTurn);
+					}
+					else
+					{
+						TargetPS->ServerSetUserState(EUserState::Gaming_OtherTurn);
+						TargetPC->UpdateUIToClient(true, EUserState::Gaming_OtherTurn);
+					}
+				}
+			}
+		}
+	}
+}
+
+void AMyGameMode::SetPlayersToWaitState()
+{
+	for (auto It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (auto PC = It->Get())
+		{
+			if (auto TargetPC = Cast<AMyPlayerController>(PC))
+			{
+				if (auto TargetPS = Cast<AMyPlayerState>(TargetPC->PlayerState))
+				{
+					TargetPS->ServerSetUserState(EUserState::Waiting);
+					TargetPC->UpdateUIToClient(false, EUserState::Waiting);
+				}
+			}
+		}
+	}
+	UE_LOG(LogTemp, Log, TEXT("MaxTurn: %d"), MaxTurn);
+}
+
+void AMyGameMode::GameEnd(const FName& WinnerName)
+{
+	// GameState Check
+	auto MyGS = GetGameState<AMyGameState>();
+	if (!MyGS)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GameStart: GameState is null"));
+		return;
+	}
+
+	// SetGameState
+	MyGS->SetIsInGame(false);
+
+	// Broadcast Game Result Message
+	if (WinnerName == NAME_None)
+	{
+		BroadcastMessage(FText::FromString(TEXT("승자 없음.. 게임 끝..")));
+	}
+	else
+	{
+		BroadcastMessage(FText::FromString(WinnerName.ToString() + TEXT(" 승리!")));
+	}
+
+	MyGS->UpdatePlayerScoreMulticast();
+	SetPlayersToWaitState();
 }

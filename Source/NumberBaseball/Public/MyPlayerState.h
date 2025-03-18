@@ -7,33 +7,36 @@
 #include "GameFramework/PlayerState.h"
 #include "MyPlayerState.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class NUMBERBASEBALL_API AMyPlayerState : public APlayerState
 {
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "User|Username")
+	UPROPERTY(Replicated)
 	FName Username;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "User|State")
-	bool bIsNameSet;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "User|State")
+	UPROPERTY(Replicated)
 	EUserState UserState;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "User|State")
-	bool bIsOuted;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 public:
 	AMyPlayerState();
-
-	void Login(const FText& NewUsername);
-
-	bool GetIsNameSet() const { return bIsNameSet; }
+	
+	EUserState GetUserState() const { return UserState; }
 	FName GetUsername() const { return Username; }
-	void SetUsername(const FName& NewUsername) { Username = NewUsername; }
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetUsername(const FName& NewUsername);
+	
+	UFUNCTION(Server, Reliable)
+	void ServerSetUserState(const EUserState& NewUserState);
+
 };
+
+
+
+
+
+
