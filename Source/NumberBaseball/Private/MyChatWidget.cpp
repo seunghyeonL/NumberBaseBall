@@ -112,9 +112,7 @@ void UMyChatWidget::SendNormalChat(const FText& CurrentText, AMyPlayerState* MyP
 void UMyChatWidget::SendBaseballNumber(const FText& CurrentText, AMyPlayerState* MyPS, AMyPlayerController* MyPC)
 {
 	FString CurrentString = CurrentText.ToString();
-
 	auto UserState = MyPS->GetUserState();
-
 	if (UserState == EUserState::Gaming_MyTurn)
 	{
 		if (CurrentString.Len() == 4 &&
@@ -198,6 +196,8 @@ void UMyChatWidget::UpdateScoreBox()
 	auto PlayerScoreDatas = MyGS->GetPlayerScoreDatas();
 	auto MyPS = GetOwningPlayerState();
 	auto MyPId = MyPS->GetPlayerId();
+	
+	UE_LOG(LogTemp, Warning, TEXT("Run Widget UpdateScoreBox,PId: %d"),MyPId);
 	
 	ScoreVerticalBox->ClearChildren();
 	

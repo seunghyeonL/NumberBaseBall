@@ -23,8 +23,9 @@
 
 AMyGameMode::AMyGameMode()
 {
-	MaxTurn = 10;
 	CurrentTurnIdx = -1;
+	DefaultMaxTurn = 10;
+	MaxTurn = DefaultMaxTurn;
 }
 
 void AMyGameMode::BroadcastMessage(const FText& Message)
@@ -83,10 +84,12 @@ void AMyGameMode::GameStart()
 	}
 	Algo::RandomShuffle(OrderOfPlayers);
 	CurrentTurnIdx = -1;
-
+	
 	// Server Ball Value Setting
 	ServerBall = UMyFuncLib::GenerateRandomNumberString();
 	ServerBall = TEXT("123");
+
+	MaxTurn = DefaultMaxTurn;
 
 	// SetPlayers
 	SetPlayersTurn(true);

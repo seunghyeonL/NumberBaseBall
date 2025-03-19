@@ -14,7 +14,7 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME(AMyPlayerState, Username);
 	DOREPLIFETIME(AMyPlayerState, UserState);
-}
+} 
 
 AMyPlayerState::AMyPlayerState()
 {
@@ -31,6 +31,7 @@ void AMyPlayerState::ServerSetUserState_Implementation(const EUserState& NewUser
 {
 	UserState = NewUserState;
 }
+
 // UE_DISABLE_OPTIMIZATION
 // void AMyPlayerState::OnRep_UserState()
 // {

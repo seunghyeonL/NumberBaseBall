@@ -36,11 +36,62 @@ void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AMyGameState, bIsInGame);
+	DOREPLIFETIME(AMyGameState, PlayerScoreDatas);
 }
 
-void AMyGameState::UpdatePlayerScoreMulticast_Implementation()
+void AMyGameState::UpdatePlayerScoreMulticastTimerHandler()
 {
 	auto MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	//   서버                 클라
+	// 리슨서버PC               PC??
+	// 클라1 PC      rep       PC
+	// 클라2 PC      rep       PC
+	//   GS                   
+
+	FString NetModeString;
+	FString LocalRoleString;
+
+	switch (GetLocalRole())
+	{
+	case ROLE_None:
+		LocalRoleString = TEXT("ROLE_None");
+		break;
+	case ROLE_Authority:
+		LocalRoleString = TEXT("ROLE_Authority");
+		break;
+	case ROLE_AutonomousProxy:
+		LocalRoleString = TEXT("ROLE_AutonomousProxy");
+		break;
+	case ROLE_SimulatedProxy:
+		LocalRoleString = TEXT("ROLE_SimulatedProxy");
+		break;
+	default:
+		LocalRoleString = TEXT("?!?!");
+		break;
+	}
+
+	switch (GetNetMode())
+	{
+	case NM_Standalone:
+		NetModeString = TEXT("Standalone (싱글플레이)");
+		break;
+	case NM_DedicatedServer:
+		NetModeString = TEXT("Dedicated Server");
+		break;
+	case NM_ListenServer:
+		NetModeString = TEXT("Listen Server");
+		break;
+	case NM_Client:
+		NetModeString = TEXT("Client");
+		break;
+	default:
+		NetModeString = TEXT("?!?!");
+		break;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("GameState NetMode: %s"), *NetModeString);
+	UE_LOG(LogTemp, Warning, TEXT("GameState LocalRole: %s"), *LocalRoleString);
+
 	if (!MyPC)
 	{
 		UE_LOG(LogTemp, Error, TEXT("UpdatePlayerScoreMulticast: AMyPlayerController is NULL"));
@@ -48,6 +99,17 @@ void AMyGameState::UpdatePlayerScoreMulticast_Implementation()
 	}
 
 	MyPC->UpdateScoreBox();
+}
+
+void AMyGameState::UpdatePlayerScoreMulticast_Implementation()
+{
+	GetWorldTimerManager().SetTimer(
+		ScoreTimerHandle,
+		this,
+		&AMyGameState::UpdatePlayerScoreMulticastTimerHandler,
+		0.5f,
+		false
+	);
 }
 
 void AMyGameState::AddPlayer_Implementation(const FName& PlayerName)
@@ -79,5 +141,3 @@ void AMyGameState::AddPlayerScore_Implementation(const FName& PlayerName)
 		}
 	}
 }
-
-

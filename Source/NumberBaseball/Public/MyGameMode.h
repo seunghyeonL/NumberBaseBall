@@ -41,4 +41,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadOnly, Category = "Server")
 	int32 MaxTurn;
+
+	int32 DefaultMaxTurn;
 };

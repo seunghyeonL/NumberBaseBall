@@ -11,7 +11,7 @@ UCLASS()
 class NUMBERBASEBALL_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-
+	
 public:
 	AMyPlayerController();
 	
@@ -43,7 +43,7 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClearHistoryBoxClient();
 
-	// UFUNCTION(Client, Reliable)
 	// void UpdateScoreBox(const TArray<FPlayerScoreData>& PlayerScores);
+	UFUNCTION(Client, Reliable)
 	void UpdateScoreBox();
 };

@@ -44,7 +44,7 @@ void AMyPlayerController::Login(const FText& NewUsername)
 	AddPlayerToServer(FName(NewUsername.ToString()));
 }
 
-void AMyPlayerController::UpdateScoreBox()
+void AMyPlayerController::UpdateScoreBox_Implementation()
 {
 	auto MyPlayerHUD = Cast<AMyPlayerHUD>(MyHUD);
 	if (!MyPlayerHUD)
@@ -59,7 +59,12 @@ void AMyPlayerController::UpdateScoreBox()
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("PC->UpdateScoreBox: Run Widget->UpdateScoreBox"));
+	FString LocalRoleString = StaticEnum<ENetRole>()->GetNameStringByValue(static_cast<int64>(GetLocalRole()));
+	FString RemoteRoleString = StaticEnum<ENetRole>()->GetNameStringByValue(static_cast<int64>(GetRemoteRole()));
+
+	UE_LOG(LogTemp, Log, TEXT("PlayerState LocalRole: %s, RemoteRole: %s"), *LocalRoleString, *RemoteRoleString);
+	// UE_LOG(LogTemp, Warning, TEXT("PC->UpdateScoreBox: Run Widget->UpdateScoreBox"));
+
 	ChatWidget->UpdateScoreBox();
 }
 
