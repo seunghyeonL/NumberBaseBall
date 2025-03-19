@@ -19,8 +19,6 @@ public:
 	
 	void Login(const FText& NewUsername);
 
-	
-
 	UFUNCTION(Server, Reliable)
 	void AddPlayerToServer(const FName& PlayerName);
 
@@ -45,6 +43,7 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClearHistoryBoxClient();
 
-	UFUNCTION(Client, Reliable)
-	void UpdateScoreBox(const TArray<FPlayerScoreData>& PlayerScores);
+	// UFUNCTION(Client, Reliable)
+	// void UpdateScoreBox(const TArray<FPlayerScoreData>& PlayerScores);
+	void UpdateScoreBox();
 };

@@ -186,11 +186,24 @@ void UMyChatWidget::UpdateUserStateText(const EUserState& UserState)
 	}
 }
 
-void UMyChatWidget::UpdateScoreBox(const TArray<FPlayerScoreData>& PlayerScoreDatas)
+void UMyChatWidget::UpdateScoreBox()
 {
+	auto MyGS = Cast<AMyGameState>(GetWorld()->GetGameState());
+	if (!MyGS)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UpdateScoreBox: No GameState!"));
+		return;
+	}
+
+	auto PlayerScoreDatas = MyGS->GetPlayerScoreDatas();
+	auto MyPS = GetOwningPlayerState();
+	auto MyPId = MyPS->GetPlayerId();
+	
 	ScoreVerticalBox->ClearChildren();
+	
 	for (auto [PlayerName, PlayerScore] : PlayerScoreDatas)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Find PlayerScoreDatas, PlayerName: %s, PlayerScore: %d, PId: %d"), *PlayerName.ToString(), PlayerScore, MyPId);
 		FString ContentString;
 		ContentString.Append(PlayerName.ToString());
 		ContentString.Append(TEXT(": "));

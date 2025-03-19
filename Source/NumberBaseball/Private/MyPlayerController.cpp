@@ -44,7 +44,7 @@ void AMyPlayerController::Login(const FText& NewUsername)
 	AddPlayerToServer(FName(NewUsername.ToString()));
 }
 
-void AMyPlayerController::UpdateScoreBox_Implementation(const TArray<FPlayerScoreData>& PlayerScores)
+void AMyPlayerController::UpdateScoreBox()
 {
 	auto MyPlayerHUD = Cast<AMyPlayerHUD>(MyHUD);
 	if (!MyPlayerHUD)
@@ -55,11 +55,12 @@ void AMyPlayerController::UpdateScoreBox_Implementation(const TArray<FPlayerScor
 	auto ChatWidget = Cast<UMyChatWidget>(MyPlayerHUD->ChatWidgetInstance);
 	if (!ChatWidget)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Login: ChatWidget is NULL"));
+		UE_LOG(LogTemp, Error, TEXT("UpdateScoreBox: ChatWidget is NULL"));
 		return;
 	}
 
-	ChatWidget->UpdateScoreBox(PlayerScores);
+	UE_LOG(LogTemp, Warning, TEXT("PC->UpdateScoreBox: Run Widget->UpdateScoreBox"));
+	ChatWidget->UpdateScoreBox();
 }
 
 void AMyPlayerController::AddPlayerToServer_Implementation(const FName& PlayerName)

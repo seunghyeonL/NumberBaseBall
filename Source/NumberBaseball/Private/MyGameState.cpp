@@ -47,7 +47,7 @@ void AMyGameState::UpdatePlayerScoreMulticast_Implementation()
 		return;
 	}
 
-	MyPC->UpdateScoreBox(PlayerScoreDatas);
+	MyPC->UpdateScoreBox();
 }
 
 void AMyGameState::AddPlayer_Implementation(const FName& PlayerName)
@@ -55,14 +55,15 @@ void AMyGameState::AddPlayer_Implementation(const FName& PlayerName)
 	PlayerScoreDatas.Add({PlayerName, 0});
 	for (auto It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AddPlayer: Before PlayerController Exists."));
+		// UE_LOG(LogTemp, Warning, TEXT("AddPlayer: Before PlayerController Exists."));
 		if (auto PC = It->Get())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AddPlayer: PlayerController Exists."));
+			// UE_LOG(LogTemp, Warning, TEXT("AddPlayer: PlayerController Exists."));
 			if (auto TargetPC = Cast<AMyPlayerController>(PC))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("AddPlayer: MyPlayerController Exists."));
-				TargetPC->UpdateScoreBox(PlayerScoreDatas);
+				// TargetPC->UpdateScoreBox(PlayerScoreDatas);
+				TargetPC->UpdateScoreBox();
 			}
 		}
 	}

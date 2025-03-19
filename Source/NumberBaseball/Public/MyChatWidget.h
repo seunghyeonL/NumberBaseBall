@@ -58,7 +58,7 @@ public:
 	void OnReadyButtonClicked();
 	
 	void UpdateUserStateText(const EUserState& UserState);
-	void UpdateScoreBox(const TArray<FPlayerScoreData>& PlayerScoreDatas);
+	void UpdateScoreBox();
 	void UpdateReadyButtonState(const bool bIsInGame);
 
 	virtual void NativeConstruct() override;
