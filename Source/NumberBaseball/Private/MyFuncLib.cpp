@@ -6,7 +6,8 @@
 FString UMyFuncLib::GetBallResult(FString ServerBall, FString PlayerBall)
 {
 	FString Result = TEXT("");
-	TMap<char, int32> ResultMap;
+	int32 StrikeCount = 0;
+	int32 BallCount = 0;
 	
 	for (int32 i = 0 ; i < 3 ; i++)
 	{
@@ -14,15 +15,17 @@ FString UMyFuncLib::GetBallResult(FString ServerBall, FString PlayerBall)
 		{
 			if (PlayerBall[i] == ServerBall[j])
 			{
-				if (i == j) ResultMap.FindOrAdd('S')++;
-				else ResultMap.FindOrAdd('B')++;
+				if (i == j) StrikeCount++;
+				else BallCount++;
 			}
 		}
 	}
+
+	if (StrikeCount == 0 && BallCount == 0) return TEXT("OUT!");
 	
-	Result.AppendInt(ResultMap.FindOrAdd('S'));
+	Result.AppendInt(StrikeCount);
 	Result.AppendChar('S');
-	Result.AppendInt(ResultMap.FindOrAdd('B'));
+	Result.AppendInt(BallCount);
 	Result.AppendChar('B');
 	return Result;
 }

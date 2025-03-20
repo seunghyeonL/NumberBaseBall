@@ -39,6 +39,19 @@ void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AMyGameState, PlayerScoreDatas);
 }
 
+void AMyGameState::UpdatePlayerHistoryMulticast_Implementation(const FString& PlayerString,
+                                                               const FString& ResultString)
+{
+	auto MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (!MyPC)
+	{
+		UE_LOG(LogTemp, Error, TEXT("UpdatePlayerHistoryMulticast: AMyPlayerController is NULL"));
+		return;
+	}
+
+	MyPC->SendOneBallResultToClient(PlayerString, ResultString);
+}
+
 void AMyGameState::UpdatePlayerScoreMulticastTimerHandler()
 {
 	auto MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());

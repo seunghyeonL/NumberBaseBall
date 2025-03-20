@@ -14,6 +14,7 @@ UCLASS()
 class NUMBERBASEBALL_API AMyGameState : public AGameState
 {
 	GENERATED_BODY()
+
 protected:
 	UPROPERTY(Replicated)
 	bool bIsInGame;
@@ -29,8 +30,8 @@ protected:
 
 public:
 	bool GetIsInGame() const { return bIsInGame; }
-	TArray<FPlayerScoreData> GetPlayerScoreDatas() const { return PlayerScoreDatas; }	
-	
+	TArray<FPlayerScoreData> GetPlayerScoreDatas() const { return PlayerScoreDatas; }
+
 	UFUNCTION(Server, Reliable)
 	void SetIsInGame(bool IsInGame);
 
@@ -40,14 +41,18 @@ public:
 	UFUNCTION(Server, Reliable)
 	void AddPlayerScore(const FName& PlayerName);
 
-	UFUNCTION(NetMulticast, Reliable) 
+	UFUNCTION(NetMulticast, Reliable)
 	void UpdatePlayerScoreMulticast();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void UpdatePlayerHistoryMulticast(const FString& PlayerString,
+	                                  const FString& ResultString);
 
 	void UpdatePlayerScoreMulticastTimerHandler();
 
 	// 서버 호출
 	// 클라1 실행
-	
+
 	// 1. A 함수를 서버가 가지고 와서 서버가 이거를 실행해줌 이거는 언리얼에서 안됨 X
 	// 2. 이벤트 디스패처 방식 -> OnRep 
 	// 3. 직접전달

@@ -24,7 +24,7 @@
 AMyGameMode::AMyGameMode()
 {
 	CurrentTurnIdx = -1;
-	DefaultMaxTurn = 10;
+	DefaultMaxTurn = 3;
 	MaxTurn = DefaultMaxTurn;
 }
 
@@ -87,7 +87,6 @@ void AMyGameMode::GameStart()
 	
 	// Server Ball Value Setting
 	ServerBall = UMyFuncLib::GenerateRandomNumberString();
-	ServerBall = TEXT("123");
 
 	MaxTurn = DefaultMaxTurn;
 
@@ -107,18 +106,27 @@ void AMyGameMode::CompareBall(AMyPlayerController* TargetPC, const FString& Numb
 	PlayerBall.AppendChar(NumberMessage[2]);
 	PlayerBall.AppendChar(NumberMessage[3]);
 
+	UE_LOG(LogTemp, Log, TEXT("MaxTurn: %d"), MaxTurn);
+	UE_LOG(LogTemp, Warning, TEXT("ServerBall: %s"), *ServerBall);
+	UE_LOG(LogTemp, Warning, TEXT("PlayerBall: %s"), *PlayerBall);
+
 	FString Result = UMyFuncLib::GetBallResult(ServerBall, PlayerBall);
 
-	TargetPC->SendOneBallResultToClient(PlayerBall, Result);
+	auto MyGS = GetGameState<AMyGameState>();
+	if (!MyGS)
+	{
+		UE_LOG(LogTemp, Error, TEXT("CompareBall: GameState is null"));
+		return;
+	}
+	
+	MyGS->UpdatePlayerHistoryMulticast(PlayerBall, Result);
+	
 	if (Result == TEXT("3S0B"))
 	{
 		if (auto TargetPS = Cast<AMyPlayerState>(TargetPC->PlayerState))
 		{
 			GameEnd(TargetPS->GetUsername());
-			if (auto MyGS = GetGameState<AMyGameState>())
-			{
-				MyGS->AddPlayerScore(TargetPS->GetUsername());
-			}
+			MyGS->AddPlayerScore(TargetPS->GetUsername());
 			return;
 		}
 	}
@@ -137,6 +145,7 @@ void AMyGameMode::SetPlayersTurn(bool bIsAtGameStart)
 {
 	CurrentTurnIdx = (CurrentTurnIdx + 1) % GetWorld()->GetNumPlayerControllers();
 	if (CurrentTurnIdx == 0) --MaxTurn;
+	
 	if (MaxTurn < 0)
 	{
 		GameEnd(FName());
@@ -185,7 +194,6 @@ void AMyGameMode::SetPlayersToWaitState()
 			}
 		}
 	}
-	UE_LOG(LogTemp, Log, TEXT("MaxTurn: %d"), MaxTurn);
 }
 
 void AMyGameMode::GameEnd(const FName& WinnerName)

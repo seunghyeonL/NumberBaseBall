@@ -94,7 +94,7 @@ void AMyPlayerController::ClearHistoryBoxClient_Implementation()
 	HistoryBox->ClearChildren();
 }
 
-void AMyPlayerController::SendOneBallResultToClient_Implementation(const FString& PlayerString,
+void AMyPlayerController::SendOneBallResultToClient(const FString& PlayerString,
                                                                    const FString& ResultString)
 {
 	auto MyPlayerHUD = Cast<AMyPlayerHUD>(MyHUD);

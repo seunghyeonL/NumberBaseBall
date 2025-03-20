@@ -37,7 +37,7 @@ public:
 	UFUNCTION(Client, Reliable)
 	void UpdateUIToClient(const bool bIsInGame, const EUserState& UserState);
 
-	UFUNCTION(Client, Reliable)
+	// UFUNCTION(Client, Reliable)
 	void SendOneBallResultToClient(const FString& PlayerString, const FString& ResultString);
 
 	UFUNCTION(Client, Reliable)
