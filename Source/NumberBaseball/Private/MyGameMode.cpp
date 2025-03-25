@@ -36,7 +36,7 @@ void AMyGameMode::BroadcastMessage(const FText& Message)
 		{
 			if (auto TargetPC = Cast<AMyPlayerController>(PC))
 			{
-				TargetPC->UpdateMessageToClient(Message);
+				TargetPC->ClientUpdateMessage(Message);
 			}
 		}
 	}
@@ -75,7 +75,7 @@ void AMyGameMode::GameStart()
 	}
 
 	// SetGameState
-	MyGS->SetIsInGame(true);
+	MyGS->ServerSetIsInGame(true);
 
 	// Player's Order, Turn Variables Setting
 	for (auto TargetPS : MyGS->PlayerArray)
@@ -119,14 +119,14 @@ void AMyGameMode::CompareBall(AMyPlayerController* TargetPC, const FString& Numb
 		return;
 	}
 	
-	MyGS->UpdatePlayerHistoryMulticast(PlayerBall, Result);
+	MyGS->MulticastUpdatePlayerHistory(PlayerBall, Result);
 	
 	if (Result == TEXT("3S0B"))
 	{
 		if (auto TargetPS = Cast<AMyPlayerState>(TargetPC->PlayerState))
 		{
 			GameEnd(TargetPS->GetUsername());
-			MyGS->AddPlayerScore(TargetPS->GetUsername());
+			MyGS->ServerAddPlayerScore(TargetPS->GetUsername());
 			return;
 		}
 	}
@@ -136,8 +136,8 @@ void AMyGameMode::CompareBall(AMyPlayerController* TargetPC, const FString& Numb
 void AMyGameMode::AddPlayer(const FName& PlayerName)
 {
 	auto MyGS = Cast<AMyGameState>(GameState);
-	MyGS->AddPlayer(PlayerName);
-	MyGS->UpdatePlayerScoreMulticast();
+	MyGS->ServerAddPlayer(PlayerName);
+	MyGS->MulticastUpdatePlayerScore();
 }
 
 
@@ -160,17 +160,17 @@ void AMyGameMode::SetPlayersTurn(bool bIsAtGameStart)
 			{
 				if (auto TargetPS = Cast<AMyPlayerState>(TargetPC->PlayerState))
 				{
-					if (bIsAtGameStart) TargetPC->ClearHistoryBoxClient();
+					if (bIsAtGameStart) TargetPC->ClientClearHistoryBox();
 					int32 CurrentTurnPlayerId = OrderOfPlayers[CurrentTurnIdx];
 					if (CurrentTurnPlayerId == TargetPS->GetPlayerId())
 					{
 						TargetPS->ServerSetUserState(EUserState::Gaming_MyTurn);
-						TargetPC->UpdateUIToClient(true, EUserState::Gaming_MyTurn);
+						TargetPC->ClientUpdateUI(true, EUserState::Gaming_MyTurn);
 					}
 					else
 					{
 						TargetPS->ServerSetUserState(EUserState::Gaming_OtherTurn);
-						TargetPC->UpdateUIToClient(true, EUserState::Gaming_OtherTurn);
+						TargetPC->ClientUpdateUI(true, EUserState::Gaming_OtherTurn);
 					}
 				}
 			}
@@ -189,7 +189,7 @@ void AMyGameMode::SetPlayersToWaitState()
 				if (auto TargetPS = Cast<AMyPlayerState>(TargetPC->PlayerState))
 				{
 					TargetPS->ServerSetUserState(EUserState::Waiting);
-					TargetPC->UpdateUIToClient(false, EUserState::Waiting);
+					TargetPC->ClientUpdateUI(false, EUserState::Waiting);
 				}
 			}
 		}
@@ -207,7 +207,7 @@ void AMyGameMode::GameEnd(const FName& WinnerName)
 	}
 
 	// SetGameState
-	MyGS->SetIsInGame(false);
+	MyGS->ServerSetIsInGame(false);
 
 	// Broadcast Game Result Message
 	if (WinnerName == NAME_None)
@@ -219,6 +219,6 @@ void AMyGameMode::GameEnd(const FName& WinnerName)
 		BroadcastMessage(FText::FromString(WinnerName.ToString() + TEXT(" 승리!")));
 	}
 
-	MyGS->UpdatePlayerScoreMulticast();
+	MyGS->MulticastUpdatePlayerScore();
 	SetPlayersToWaitState();
 }

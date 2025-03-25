@@ -27,7 +27,7 @@
 // 	//    메세지    메세지    메세지
 // }
 
-void AMyGameState::SetIsInGame_Implementation(bool IsInGame)
+void AMyGameState::ServerSetIsInGame_Implementation(bool IsInGame)
 {
 	bIsInGame = IsInGame;
 }
@@ -39,7 +39,7 @@ void AMyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AMyGameState, PlayerScoreDatas);
 }
 
-void AMyGameState::UpdatePlayerHistoryMulticast_Implementation(const FString& PlayerString,
+void AMyGameState::MulticastUpdatePlayerHistory_Implementation(const FString& PlayerString,
                                                                const FString& ResultString)
 {
 	auto MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
@@ -49,7 +49,7 @@ void AMyGameState::UpdatePlayerHistoryMulticast_Implementation(const FString& Pl
 		return;
 	}
 
-	MyPC->SendOneBallResultToClient(PlayerString, ResultString);
+	MyPC->ClientSendOneBallResult(PlayerString, ResultString);
 }
 
 void AMyGameState::UpdatePlayerScoreMulticastTimerHandler()
@@ -111,10 +111,10 @@ void AMyGameState::UpdatePlayerScoreMulticastTimerHandler()
 		return;
 	}
 
-	MyPC->UpdateScoreBox();
+	MyPC->ClientUpdateScoreBox();
 }
 
-void AMyGameState::UpdatePlayerScoreMulticast_Implementation()
+void AMyGameState::MulticastUpdatePlayerScore_Implementation()
 {
 	GetWorldTimerManager().SetTimer(
 		ScoreTimerHandle,
@@ -125,7 +125,7 @@ void AMyGameState::UpdatePlayerScoreMulticast_Implementation()
 	);
 }
 
-void AMyGameState::AddPlayer_Implementation(const FName& PlayerName)
+void AMyGameState::ServerAddPlayer_Implementation(const FName& PlayerName)
 {
 	PlayerScoreDatas.Add({PlayerName, 0});
 	for (auto It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
@@ -138,13 +138,13 @@ void AMyGameState::AddPlayer_Implementation(const FName& PlayerName)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("AddPlayer: MyPlayerController Exists."));
 				// TargetPC->UpdateScoreBox(PlayerScoreDatas);
-				TargetPC->UpdateScoreBox();
+				TargetPC->ClientUpdateScoreBox();
 			}
 		}
 	}
 }
 
-void AMyGameState::AddPlayerScore_Implementation(const FName& PlayerName)
+void AMyGameState::ServerAddPlayerScore_Implementation(const FName& PlayerName)
 {
 	for (auto& PlayerScoreData : PlayerScoreDatas)
 	{

@@ -22,7 +22,7 @@ class NUMBERBASEBALL_API UMyChatWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-public:
+private:
 	// Input TextBox
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UEditableTextBox> EditableTextBox;
@@ -50,22 +50,30 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> UserStateTextBlock;
 
+	
+	void SendNameSettingChat(const FText& CurrentText, AMyPlayerState* MyPS, AMyPlayerController* MyPC);
+	void SendNormalChat(const FText& CurrentText, AMyPlayerState* MyPS, AMyPlayerController* MyPC);
+	void SendBaseballNumber(const FText& CurrentText, AMyPlayerState* MyPS, AMyPlayerController* MyPC);
+	
+public:
 	// Commit Handler
 	UFUNCTION()
 	void OnTextCommitted(const FText& CurrentText, ETextCommit::Type CommitType);
 
 	UFUNCTION()
 	void OnReadyButtonClicked();
-	
+
 	void UpdateUserStateText(const EUserState& UserState);
+	
 	void UpdateScoreBox();
+	
 	void UpdateReadyButtonState(const bool bIsInGame);
 
+	void AddChatTextBlock(const FText& Message);
+
+	void ClearHistoryBox();
+	void AddHistoryTextBlock(const FString& PlayerString,
+	                         const FString& ResultString);
+
 	virtual void NativeConstruct() override;
-
-private:
-	void SendNameSettingChat(const FText& CurrentText, AMyPlayerState* MyPS, AMyPlayerController* MyPC);
-	void SendNormalChat(const FText& CurrentText, AMyPlayerState* MyPS, AMyPlayerController* MyPC);
-	void SendBaseballNumber(const FText& CurrentText, AMyPlayerState* MyPS, AMyPlayerController* MyPC);
 };
-

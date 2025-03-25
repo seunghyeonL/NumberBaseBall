@@ -90,7 +90,7 @@ void UMyChatWidget::OnReadyButtonClicked()
 	}
 
 	// 서버 RPC
-	MyPC->SendReadySignalToServer();
+	MyPC->ServerSendReadySignal();
 }
 
 void UMyChatWidget::SendNameSettingChat(const FText& CurrentText, AMyPlayerState* MyPS, AMyPlayerController* MyPC)
@@ -98,14 +98,14 @@ void UMyChatWidget::SendNameSettingChat(const FText& CurrentText, AMyPlayerState
 	MyPC->Login(CurrentText);
 	EditableTextBox->SetText(FText::FromString(TEXT("")));
 	EditableTextBox->SetHintText(FText::FromString(TEXT("")));
-	MyPC->SendMessageToServer(MyPC, FText::FromString(CurrentText.ToString() + FString(TEXT("님 입장"))));
+	MyPC->ServerSendMessage(MyPC, FText::FromString(CurrentText.ToString() + FString(TEXT("님 입장"))));
 }
 
 void UMyChatWidget::SendNormalChat(const FText& CurrentText, AMyPlayerState* MyPS, AMyPlayerController* MyPC)
 {
 	const FName Username = MyPS->GetUsername();
 	EditableTextBox->SetText(FText::FromString(TEXT("")));
-	MyPC->SendMessageToServer(
+	MyPC->ServerSendMessage(
 		MyPC, FText::FromString(Username.ToString() + FString(TEXT(": ")) + CurrentText.ToString()));
 }
 
@@ -127,7 +127,7 @@ void UMyChatWidget::SendBaseballNumber(const FText& CurrentText, AMyPlayerState*
 		{
 			const FName Username = MyPS->GetUsername();
 			EditableTextBox->SetText(FText::FromString(TEXT("")));
-			MyPC->SendBaseballMessageToServer(
+			MyPC->ServerSendBaseballMessage(
 				MyPC, CurrentText.ToString());
 		}
 		else
@@ -196,14 +196,15 @@ void UMyChatWidget::UpdateScoreBox()
 	auto PlayerScoreDatas = MyGS->GetPlayerScoreDatas();
 	auto MyPS = GetOwningPlayerState();
 	auto MyPId = MyPS->GetPlayerId();
-	
-	UE_LOG(LogTemp, Warning, TEXT("Run Widget UpdateScoreBox,PId: %d"),MyPId);
-	
+
+	UE_LOG(LogTemp, Warning, TEXT("Run Widget UpdateScoreBox,PId: %d"), MyPId);
+
 	ScoreVerticalBox->ClearChildren();
-	
+
 	for (auto [PlayerName, PlayerScore] : PlayerScoreDatas)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Find PlayerScoreDatas, PlayerName: %s, PlayerScore: %d, PId: %d"), *PlayerName.ToString(), PlayerScore, MyPId);
+		UE_LOG(LogTemp, Warning, TEXT("Find PlayerScoreDatas, PlayerName: %s, PlayerScore: %d, PId: %d"),
+		       *PlayerName.ToString(), PlayerScore, MyPId);
 		FString ContentString;
 		ContentString.Append(PlayerName.ToString());
 		ContentString.Append(TEXT(": "));
@@ -228,4 +229,24 @@ void UMyChatWidget::UpdateReadyButtonState(const bool bIsInGame)
 		ReadyButton->SetVisibility(ESlateVisibility::Visible);
 		ReadyButtonTextBlock->SetText(FText::FromString(TEXT("준비버튼")));
 	}
+}
+
+void UMyChatWidget::AddChatTextBlock(const FText& Message)
+{
+	UTextBlock* NewTextBlock = NewObject<UTextBlock>(ChatVerticalBox);
+	NewTextBlock->SetText(Message);
+	ChatVerticalBox->AddChild(NewTextBlock);
+}
+
+void UMyChatWidget::ClearHistoryBox()
+{
+	HistoryVerticalBox->ClearChildren();
+}
+
+void UMyChatWidget::AddHistoryTextBlock(const FString& PlayerString,
+                                        const FString& ResultString)
+{
+	UTextBlock* NewTextBlock = NewObject<UTextBlock>(HistoryVerticalBox);
+	NewTextBlock->SetText(FText::FromString(PlayerString + TEXT(" -> ") + ResultString));
+	HistoryVerticalBox->AddChild(NewTextBlock);
 }

@@ -41,10 +41,10 @@ void AMyPlayerController::Login(const FText& NewUsername)
 
 	ChatWidget->UpdateUserStateText(EUserState::Waiting);
 
-	AddPlayerToServer(FName(NewUsername.ToString()));
+	ServerAddPlayer(FName(NewUsername.ToString()));
 }
 
-void AMyPlayerController::UpdateScoreBox_Implementation()
+void AMyPlayerController::ClientUpdateScoreBox_Implementation()
 {
 	auto MyPlayerHUD = Cast<AMyPlayerHUD>(MyHUD);
 	if (!MyPlayerHUD)
@@ -58,17 +58,13 @@ void AMyPlayerController::UpdateScoreBox_Implementation()
 		UE_LOG(LogTemp, Error, TEXT("UpdateScoreBox: ChatWidget is NULL"));
 		return;
 	}
-
-	FString LocalRoleString = StaticEnum<ENetRole>()->GetNameStringByValue(static_cast<int64>(GetLocalRole()));
-	FString RemoteRoleString = StaticEnum<ENetRole>()->GetNameStringByValue(static_cast<int64>(GetRemoteRole()));
-
-	UE_LOG(LogTemp, Log, TEXT("PlayerState LocalRole: %s, RemoteRole: %s"), *LocalRoleString, *RemoteRoleString);
+	
 	// UE_LOG(LogTemp, Warning, TEXT("PC->UpdateScoreBox: Run Widget->UpdateScoreBox"));
 
 	ChatWidget->UpdateScoreBox();
 }
 
-void AMyPlayerController::AddPlayerToServer_Implementation(const FName& PlayerName)
+void AMyPlayerController::ServerAddPlayer_Implementation(const FName& PlayerName)
 {
 	auto MyGM = Cast<AMyGameMode>(GetWorld()->GetAuthGameMode());
 	if (!MyGM)
@@ -80,7 +76,7 @@ void AMyPlayerController::AddPlayerToServer_Implementation(const FName& PlayerNa
 	MyGM->AddPlayer(PlayerName);	
 }
 
-void AMyPlayerController::ClearHistoryBoxClient_Implementation()
+void AMyPlayerController::ClientClearHistoryBox_Implementation()
 {
 	auto MyPlayerHUD = Cast<AMyPlayerHUD>(MyHUD);
 	auto ChatWidget = Cast<UMyChatWidget>(MyPlayerHUD->ChatWidgetInstance);
@@ -90,11 +86,10 @@ void AMyPlayerController::ClearHistoryBoxClient_Implementation()
 		return;
 	}
 
-	auto HistoryBox = ChatWidget->HistoryVerticalBox;
-	HistoryBox->ClearChildren();
+	ChatWidget->ClearHistoryBox();
 }
 
-void AMyPlayerController::SendOneBallResultToClient(const FString& PlayerString,
+void AMyPlayerController::ClientSendOneBallResult(const FString& PlayerString,
                                                                    const FString& ResultString)
 {
 	auto MyPlayerHUD = Cast<AMyPlayerHUD>(MyHUD);
@@ -105,13 +100,10 @@ void AMyPlayerController::SendOneBallResultToClient(const FString& PlayerString,
 		return;
 	}
 
-	auto HistoryBox = ChatWidget->HistoryVerticalBox;
-	UTextBlock* NewTextBlock = NewObject<UTextBlock>(HistoryBox);
-	NewTextBlock->SetText(FText::FromString(PlayerString + TEXT(" -> ") + ResultString));
-	HistoryBox->AddChild(NewTextBlock);
+	ChatWidget->AddHistoryTextBlock(PlayerString, ResultString);
 }
 
-void AMyPlayerController::UpdateMessageToClient_Implementation(const FText& Message)
+void AMyPlayerController::ClientUpdateMessage_Implementation(const FText& Message)
 {
 	auto MyPlayerHUD = Cast<AMyPlayerHUD>(MyHUD);
 	if (!MyPlayerHUD)
@@ -127,13 +119,10 @@ void AMyPlayerController::UpdateMessageToClient_Implementation(const FText& Mess
 		return;
 	}
 
-	UVerticalBox* ChatBox = ChatWidget->ChatVerticalBox;
-	UTextBlock* NewTextBlock = NewObject<UTextBlock>(ChatBox);
-	NewTextBlock->SetText(Message);
-	ChatBox->AddChild(NewTextBlock);
+	ChatWidget->AddChatTextBlock(Message);
 }
 
-void AMyPlayerController::SendMessageToServer_Implementation(AMyPlayerController* MyPC, const FText& Message)
+void AMyPlayerController::ServerSendMessage_Implementation(AMyPlayerController* MyPC, const FText& Message)
 {
 	auto MyGM = GetWorld()->GetAuthGameMode<AMyGameMode>();
 	if (!MyGM)
@@ -146,7 +135,7 @@ void AMyPlayerController::SendMessageToServer_Implementation(AMyPlayerController
 }
 
 
-void AMyPlayerController::SendBaseballMessageToServer_Implementation(AMyPlayerController* MyPC,
+void AMyPlayerController::ServerSendBaseballMessage_Implementation(AMyPlayerController* MyPC,
                                                                      const FString& NumberMessage)
 {
 	auto MyGM = GetWorld()->GetAuthGameMode<AMyGameMode>();
@@ -159,7 +148,7 @@ void AMyPlayerController::SendBaseballMessageToServer_Implementation(AMyPlayerCo
 	MyGM->CompareBall(MyPC, NumberMessage);
 }
 
-void AMyPlayerController::UpdateUIToClient_Implementation(const bool bIsInGame, const EUserState& UserState)
+void AMyPlayerController::ClientUpdateUI_Implementation(const bool bIsInGame, const EUserState& UserState)
 {
 	auto MyPlayerHUD = Cast<AMyPlayerHUD>(MyHUD);
 	if (!MyPlayerHUD)
@@ -181,7 +170,7 @@ void AMyPlayerController::UpdateUIToClient_Implementation(const bool bIsInGame, 
 	ChatWidget->UpdateUserStateText(UserState);
 }
 
-void AMyPlayerController::SendReadySignalToServer_Implementation()
+void AMyPlayerController::ServerSendReadySignal_Implementation()
 {
 	auto MyGM = GetWorld()->GetAuthGameMode<AMyGameMode>();
 	if (!MyGM)

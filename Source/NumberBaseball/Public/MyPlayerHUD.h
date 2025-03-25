@@ -14,7 +14,7 @@ class NUMBERBASEBALL_API AMyPlayerHUD : public AHUD
 
 public:
 	AMyPlayerHUD();
-
+	
 	virtual void BeginPlay() override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")

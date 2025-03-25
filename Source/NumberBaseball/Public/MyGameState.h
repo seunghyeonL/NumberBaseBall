@@ -33,19 +33,19 @@ public:
 	TArray<FPlayerScoreData> GetPlayerScoreDatas() const { return PlayerScoreDatas; }
 
 	UFUNCTION(Server, Reliable)
-	void SetIsInGame(bool IsInGame);
+	void ServerSetIsInGame(bool IsInGame);
 
 	UFUNCTION(Server, Reliable)
-	void AddPlayer(const FName& PlayerName);
+	void ServerAddPlayer(const FName& PlayerName);
 
 	UFUNCTION(Server, Reliable)
-	void AddPlayerScore(const FName& PlayerName);
+	void ServerAddPlayerScore(const FName& PlayerName);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void UpdatePlayerScoreMulticast();
+	void MulticastUpdatePlayerScore();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void UpdatePlayerHistoryMulticast(const FString& PlayerString,
+	void MulticastUpdatePlayerHistory(const FString& PlayerString,
 	                                  const FString& ResultString);
 
 	void UpdatePlayerScoreMulticastTimerHandler();

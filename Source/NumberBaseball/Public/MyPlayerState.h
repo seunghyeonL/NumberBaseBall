@@ -32,7 +32,6 @@ public:
 	
 	UFUNCTION(Server, Reliable)
 	void ServerSetUserState(const EUserState& NewUserState);
-
 };
 
 

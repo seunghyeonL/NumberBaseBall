@@ -20,30 +20,30 @@ public:
 	void Login(const FText& NewUsername);
 
 	UFUNCTION(Server, Reliable)
-	void AddPlayerToServer(const FName& PlayerName);
+	void ServerAddPlayer(const FName& PlayerName);
 
 	UFUNCTION(Server, Reliable)
-	void SendMessageToServer(AMyPlayerController* MyPC, const FText& Message);
+	void ServerSendMessage(AMyPlayerController* MyPC, const FText& Message);
 
 	UFUNCTION(Server, Reliable)
-	void SendBaseballMessageToServer(AMyPlayerController* MyPC, const FString& NumberMessage);
+	void ServerSendBaseballMessage(AMyPlayerController* MyPC, const FString& NumberMessage);
 
 	UFUNCTION(Server, Reliable)
-	void SendReadySignalToServer();
+	void ServerSendReadySignal();
 
 	UFUNCTION(Client, Reliable)
-	void UpdateMessageToClient(const FText& Message);
+	void ClientUpdateMessage(const FText& Message);
 
 	UFUNCTION(Client, Reliable)
-	void UpdateUIToClient(const bool bIsInGame, const EUserState& UserState);
-
+	void ClientUpdateUI(const bool bIsInGame, const EUserState& UserState);
+	
 	// UFUNCTION(Client, Reliable)
-	void SendOneBallResultToClient(const FString& PlayerString, const FString& ResultString);
+	void ClientSendOneBallResult(const FString& PlayerString, const FString& ResultString);
 
 	UFUNCTION(Client, Reliable)
-	void ClearHistoryBoxClient();
+	void ClientClearHistoryBox();
 
 	// void UpdateScoreBox(const TArray<FPlayerScoreData>& PlayerScores);
 	UFUNCTION(Client, Reliable)
-	void UpdateScoreBox();
+	void ClientUpdateScoreBox();
 };
