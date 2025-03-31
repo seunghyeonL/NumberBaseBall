@@ -52,58 +52,9 @@ void AMyGameState::MulticastUpdatePlayerHistory_Implementation(const FString& Pl
 	MyPC->ClientSendOneBallResult(PlayerString, ResultString);
 }
 
-void AMyGameState::UpdatePlayerScoreMulticastTimerHandler()
+void AMyGameState::OnRep_PlayerScoreDatas()
 {
 	auto MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
-	//   서버                 클라
-	// 리슨서버PC               PC??
-	// 클라1 PC      rep       PC
-	// 클라2 PC      rep       PC
-	//   GS                   
-
-	FString NetModeString;
-	FString LocalRoleString;
-
-	switch (GetLocalRole())
-	{
-	case ROLE_None:
-		LocalRoleString = TEXT("ROLE_None");
-		break;
-	case ROLE_Authority:
-		LocalRoleString = TEXT("ROLE_Authority");
-		break;
-	case ROLE_AutonomousProxy:
-		LocalRoleString = TEXT("ROLE_AutonomousProxy");
-		break;
-	case ROLE_SimulatedProxy:
-		LocalRoleString = TEXT("ROLE_SimulatedProxy");
-		break;
-	default:
-		LocalRoleString = TEXT("?!?!");
-		break;
-	}
-
-	switch (GetNetMode())
-	{
-	case NM_Standalone:
-		NetModeString = TEXT("Standalone (싱글플레이)");
-		break;
-	case NM_DedicatedServer:
-		NetModeString = TEXT("Dedicated Server");
-		break;
-	case NM_ListenServer:
-		NetModeString = TEXT("Listen Server");
-		break;
-	case NM_Client:
-		NetModeString = TEXT("Client");
-		break;
-	default:
-		NetModeString = TEXT("?!?!");
-		break;
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("GameState NetMode: %s"), *NetModeString);
-	UE_LOG(LogTemp, Warning, TEXT("GameState LocalRole: %s"), *LocalRoleString);
 
 	if (!MyPC)
 	{
@@ -114,16 +65,29 @@ void AMyGameState::UpdatePlayerScoreMulticastTimerHandler()
 	MyPC->ClientUpdateScoreBox();
 }
 
-void AMyGameState::MulticastUpdatePlayerScore_Implementation()
-{
-	GetWorldTimerManager().SetTimer(
-		ScoreTimerHandle,
-		this,
-		&AMyGameState::UpdatePlayerScoreMulticastTimerHandler,
-		0.5f,
-		false
-	);
-}
+// void AMyGameState::UpdatePlayerScoreMulticastTimerHandler()
+// {
+// 	auto MyPC = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+//
+// 	if (!MyPC)
+// 	{
+// 		UE_LOG(LogTemp, Error, TEXT("UpdatePlayerScoreMulticast: AMyPlayerController is NULL"));
+// 		return;
+// 	}
+//
+// 	MyPC->ClientUpdateScoreBox();
+// }
+
+// void AMyGameState::MulticastUpdatePlayerScore_Implementation()
+// {
+// 	GetWorldTimerManager().SetTimer(
+// 		ScoreTimerHandle,
+// 		this,
+// 		&AMyGameState::UpdatePlayerScoreMulticastTimerHandler,
+// 		0.5f,
+// 		false
+// 	);
+// }
 
 void AMyGameState::ServerAddPlayer_Implementation(const FName& PlayerName)
 {

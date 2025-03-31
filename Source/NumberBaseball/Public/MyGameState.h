@@ -19,7 +19,7 @@ protected:
 	UPROPERTY(Replicated)
 	bool bIsInGame;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing=OnRep_PlayerScoreDatas)
 	TArray<FPlayerScoreData> PlayerScoreDatas; // 바꿨어
 	// 값이 변경될때 OnRep 호출하고
 	// 클라 두개에만 UpdateScore
@@ -41,14 +41,17 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerAddPlayerScore(const FName& PlayerName);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastUpdatePlayerScore();
+	UFUNCTION()
+	void OnRep_PlayerScoreDatas();
+
+	// UFUNCTION(NetMulticast, Reliable)
+	// void MulticastUpdatePlayerScore();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastUpdatePlayerHistory(const FString& PlayerString,
 	                                  const FString& ResultString);
 
-	void UpdatePlayerScoreMulticastTimerHandler();
+	// void UpdatePlayerScoreMulticastTimerHandler();
 
 	// 서버 호출
 	// 클라1 실행

@@ -125,8 +125,8 @@ void AMyGameMode::CompareBall(AMyPlayerController* TargetPC, const FString& Numb
 	{
 		if (auto TargetPS = Cast<AMyPlayerState>(TargetPC->PlayerState))
 		{
-			GameEnd(TargetPS->GetUsername());
 			MyGS->ServerAddPlayerScore(TargetPS->GetUsername());
+			GameEnd(TargetPS->GetUsername());
 			return;
 		}
 	}
@@ -137,7 +137,7 @@ void AMyGameMode::AddPlayer(const FName& PlayerName)
 {
 	auto MyGS = Cast<AMyGameState>(GameState);
 	MyGS->ServerAddPlayer(PlayerName);
-	MyGS->MulticastUpdatePlayerScore();
+	// MyGS->MulticastUpdatePlayerScore();
 }
 
 
@@ -219,6 +219,7 @@ void AMyGameMode::GameEnd(const FName& WinnerName)
 		BroadcastMessage(FText::FromString(WinnerName.ToString() + TEXT(" 승리!")));
 	}
 
-	MyGS->MulticastUpdatePlayerScore();
+	// MyGS->MulticastUpdatePlayerScore();
+	MyGS->OnRep_PlayerScoreDatas();
 	SetPlayersToWaitState();
 }
